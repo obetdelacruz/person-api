@@ -1,4 +1,5 @@
 import Person from "../models/Person.js";
+import User from "../models/User.js";
 import isString from "../utils/isString.js";
 
 async function getPersons(_, res) {
@@ -20,9 +21,12 @@ async function getPerson(req, res, next) {
   }
 }
 
+// HTTP CreatePerson
 async function createPerson(req, res, next) {
   try {
-    const { name, number } = req.body;
+    const { name, number, userId } = req.body;
+
+    const user = await User.findById(userId);
 
     if (name === undefined || number === undefined)
       return res.status(400).json({ error: "Content is missing" });
@@ -41,9 +45,13 @@ async function createPerson(req, res, next) {
     const person = new Person({
       name,
       number,
+      user: user.id,
     });
 
     const savedPerson = await person.save();
+
+    user.persons = user.persons.concat(savedPerson._id);
+    await user.save();
 
     return res.status(201).json(savedPerson);
   } catch (error) {
@@ -51,6 +59,7 @@ async function createPerson(req, res, next) {
   }
 }
 
+//HTTP Update Person
 async function updatePerson(req, res, next) {
   const id = req.params.id;
   const { name, number } = req.body;

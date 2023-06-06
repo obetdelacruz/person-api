@@ -12,8 +12,7 @@ const personSchema = new mongoose.Schema({
     required: true,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    user: String,
   },
 });
 

@@ -1,6 +1,9 @@
 import Person from "../models/Person.js";
 import User from "../models/User.js";
 import isString from "../utils/isString.js";
+import getTokenFrom from "../utils/getTokenFrom.js";
+import jwt from "jsonwebtoken";
+import config from "../utils/config.js";
 
 async function getPersons(_, res) {
   const persons = await Person.find({});
@@ -25,6 +28,11 @@ async function getPerson(req, res, next) {
 async function createPerson(req, res, next) {
   try {
     const { name, number, userId } = req.body;
+    const decodedToken = jwt.verify(getTokenFrom(req), config.SECRET);
+
+    if (!decodedToken.id) {
+      return res.status(401).json({ error: "Token missing or invalid" });
+    }
 
     const user = await User.findById(userId);
 
